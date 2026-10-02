@@ -1,0 +1,14 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Content-Security-Policy: default-src 'none'; img-src 'self'; style-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; object-src 'none'
+
+/updates/*
+  Content-Type: application/xml; charset=utf-8
+  Cache-Control: no-cache, no-transform
+
+/SHA256SUMS.txt
+  Cache-Control: no-cache
+
+/release.json
+  Cache-Control: no-cache

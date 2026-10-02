@@ -1,0 +1,11 @@
+{
+  "name": "mur-releases",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{"pattern": "mur.lendario.ai", "custom_domain": true}],
+  "assets": {"directory": "../dist/site", "binding": "ASSETS", "run_worker_first": ["/downloads/*"]},
+  "r2_buckets": [{"binding": "RELEASES", "bucket_name": "mur-releases"}],
+  "observability": {"enabled": false}
+}

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>MUR — Model Usage Reports</title>
+  <link rel="icon" href="/favicon.svg?v=agents-20261001" type="image/svg+xml">
+  <link rel="preload" href="/fonts/geist.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/source-serif-4.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/flow.css">
+  <script src="/theme.js"></script>
+  <script src="/app.js" defer></script>
+  <script src="/flow.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Ir para o conteúdo</a>
+  <svg class="icon-sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-overview" viewBox="0 0 16 16"><path d="M2.5 13.5h11M4 11V7.5M7 11V3.5M10 11V6M13 11V8.5"/></symbol>
+    <symbol id="i-live" viewBox="0 0 16 16"><path d="M1.5 8h3l1.5-4.5 3 9 1.5-4.5h4"/></symbol>
+    <symbol id="i-sessions" viewBox="0 0 16 16"><path d="M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z"/></symbol>
+    <symbol id="i-projects" viewBox="0 0 16 16"><path d="M1.5 4.5v8h13v-6.5h-6.5l-1.5-1.5z"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 16 16"><path d="M2 4.5h7M12 4.5h2M2 11.5h2M7 11.5h7"/><circle cx="10.5" cy="4.5" r="1.5"/><circle cx="5.5" cy="11.5" r="1.5"/></symbol>
+    <symbol id="i-report" viewBox="0 0 16 16"><path d="M3.5 1.5h6l3 3v10h-9zM9.5 1.5v3h3M5.5 8h5M5.5 11h5"/></symbol>
+    <symbol id="i-theme" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 2.5v11a5.5 5.5 0 0 0 0-11z" class="fill"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 16 16"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2v3.5H10"/></symbol>
+    <symbol id="i-download" viewBox="0 0 16 16"><path d="M8 2v8.5M4.5 7 8 10.5 11.5 7M2.5 13.5h11"/></symbol>
+    <symbol id="i-flow" viewBox="0 0 16 16"><path d="M8 2.5v3M8 5.5 3.5 9v3M8 5.5v6.5M8 5.5l4.5 3.5v3"/><circle cx="8" cy="2.5" r="1"/></symbol>
+    <symbol id="i-play" viewBox="0 0 16 16"><path d="M5 3.2v9.6L12.5 8z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 16 16"><circle cx="8" cy="5.5" r="2.5"/><path d="M3 13.5c.6-2.6 2.6-4 5-4s4.4 1.4 5 4"/></symbol>
+    <symbol id="i-spark" viewBox="0 0 16 16"><path d="M8 2v3M8 11v3M2 8h3M11 8h3M3.8 3.8l2 2M10.2 10.2l2 2M3.8 12.2l2-2M10.2 5.8l2-2"/></symbol>
+    <symbol id="i-file" viewBox="0 0 16 16"><path d="M4 1.5h5l3 3v10H4z"/><path d="M9 1.5v3h3M6 8h4M6 10.5h4"/></symbol>
+    <symbol id="i-agents" viewBox="0 0 16 16"><circle cx="8" cy="3.5" r="1.6"/><circle cx="3.5" cy="12" r="1.6"/><circle cx="8" cy="12" r="1.6"/><circle cx="12.5" cy="12" r="1.6"/><path d="M8 5.1v5.3M7 5 4.2 10.5M9 5l2.8 5.5"/></symbol>
+    <symbol id="i-gate" viewBox="0 0 16 16"><path d="M8 1.5 13 3.5v4c0 3-2.2 5.3-5 6.8C5.2 12.8 3 10.5 3 7.5v-4z"/><path d="m5.8 8 1.6 1.6 2.9-3.1"/></symbol>
+    <symbol id="i-ship" viewBox="0 0 16 16"><path d="M8 10.5V2M4.8 5.2 8 2l3.2 3.2"/><path d="M2.5 9.5v4h11v-4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 16 16"><path d="m3.5 8.5 3 3 6-6.5"/></symbol>
+    <symbol id="i-x" viewBox="0 0 16 16"><path d="m4 4 8 8M12 4l-8 8"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 16 16"><rect x="4" y="4" width="8" height="8" rx="1.5"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 16 16"><path d="M5.5 3.5v9M10.5 3.5v9"/></symbol>
+    <symbol id="i-compact" viewBox="0 0 16 16"><path d="M3 5.5h10M3 10.5h10M8 1.5v2.5M6.5 2.8 8 4l1.5-1.2M8 14.5V12M6.5 13.2 8 12l1.5 1.2"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 16 16"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10"/></symbol>
+    <symbol id="i-collapse" viewBox="0 0 16 16"><path d="M6 2.5V6H2.5M13.5 6H10V2.5M10 13.5V10h3.5M2.5 10H6v3.5"/></symbol>
+    <symbol id="i-back" viewBox="0 0 16 16"><path d="M13 8H3.5M7.5 4 3.5 8l4 4"/></symbol>
+  </svg>
+  <aside class="sidebar">
+    <a class="brand" href="#overview" aria-label="MUR — Model Usage Reports" title="Model Usage Reports"><img src="/favicon.svg?v=agents-20261001" width="28" height="28" alt=""><span>MUR</span></a>
+    <nav aria-label="Navegação principal">
+      <a href="#overview" data-view="overview"><svg class="icon" aria-hidden="true"><use href="#i-overview"/></svg><span>Visão geral</span></a>
+      <a href="#limits" data-view="limits"><svg class="icon" aria-hidden="true"><use href="#i-overview"/></svg><span>Uso disponível</span><span id="limit-badge"></span></a>
+      <a href="#live" data-view="live"><svg class="icon" aria-hidden="true"><use href="#i-live"/></svg><span>Em execução</span><span id="live-count"></span></a>
+      <a href="#flow" data-view="flow"><svg class="icon" aria-hidden="true"><use href="#i-flow"/></svg><span>Fluxo de trabalho</span></a>
+      <a href="#sessions" data-view="sessions"><svg class="icon" aria-hidden="true"><use href="#i-sessions"/></svg><span>Conversas</span></a>
+      <a href="#projects" data-view="projects"><svg class="icon" aria-hidden="true"><use href="#i-projects"/></svg><span>Projetos</span></a>
+      <a href="#settings" data-view="settings"><svg class="icon" aria-hidden="true"><use href="#i-settings"/></svg><span>Configurações</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a id="saved-report" href="/report/?view=1" target="_blank" rel="noopener" hidden><svg class="icon" aria-hidden="true"><use href="#i-report"/></svg>Relatório salvo</a>
+      <button id="theme-toggle" class="quiet" type="button"><svg class="icon" aria-hidden="true"><use href="#i-theme"/></svg><span id="theme-label">Alternar tema</span></button>
+      <span class="local-mark"><i></i> Somente neste Mac</span>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="sync"><span id="machine">Computador local</span><span id="last-sync">Conectando ao índice…</span></div>
+      <button id="refresh" type="button"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg><span>Atualizar registros</span></button>
+    </header>
+    <div id="error" class="notice error" role="alert" hidden><span id="error-message"></span><button id="retry-view" class="quiet" type="button" hidden>Tentar novamente</button></div>
+    <div id="index-progress" class="notice" role="status" hidden><span id="index-label"></span><progress id="index-meter" max="100" value="0"></progress></div>
+    <main id="main" tabindex="-1">
+      <div class="page-heading">
+        <div><h1 id="page-title">Visão geral</h1><p id="page-description">Conversas, projetos e consumo em um só lugar.</p></div>
+        <button id="export" class="quiet" type="button" disabled><svg class="icon" aria-hidden="true"><use href="#i-download"/></svg><span>Exportar CSV</span></button>
+      </div>
+      <div id="request-status" class="request-status" role="status" aria-live="polite" aria-atomic="true"><span class="loading-spinner" aria-hidden="true"></span><span id="request-label">Abrindo o painel…</span></div>
+      <section id="welcome" class="panel" hidden aria-labelledby="welcome-title"><h2 id="welcome-title">Seu uso de IA, em um só lugar.</h2><p>O MUR encontra os registros e identifica contas e planos quando esses dados estão disponíveis no Mac. Suas conversas ficam neste computador.</p><p id="detected-sources"></p><div id="welcome-accounts" class="account-list"></div><p>Quer comparar com suas assinaturas? Confira as contas e informe o valor mensal que paga. Essa etapa é opcional: você pode fazer depois, em Contas e assinaturas.</p><button id="start-analysis" type="button">Começar análise</button> <a href="#settings">Revisar contas e mensalidades</a></section>
+      <section id="overview-summary" class="ledger view" data-section="overview" aria-label="Resumo do período">
+        <article class="ledger-lead"><h2>Custo técnico equivalente</h2><strong id="metric-usd">—</strong><p>Estimativa de consumo; não é uma fatura.</p></article>
+        <article><h2>Tokens processados</h2><strong id="metric-tokens">—</strong><p id="metric-cache">Inclui o contexto reutilizado em cada chamada.</p></article>
+        <article><h2>Sessões com consumo</h2><strong id="metric-sessions">—</strong><p id="metric-events">Conversas e subagentes identificados.</p></article>
+        <article><h2>Assinaturas · custo proporcional</h2><strong id="metric-subscription">—</strong><p id="metric-monthly">Valores e datas informados por você.</p><p id="metric-paid"></p><a id="review-subscriptions" href="#settings">Revisar histórico de assinaturas</a></article>
+        <div class="share-block"><div class="share-head"><h2>Participação nos tokens</h2><div id="share-legend" class="legend"></div></div><div id="provider-share" class="share-bar" role="img" aria-label="Participação por provedor"></div></div>
+      </section>
+      <form id="filters" class="filters" aria-label="Filtrar consumo">
+        <label>Período<select name="period"><option value="7d">Últimos 7 dias</option><option value="combined" hidden>7 dias · coleta importada</option><option value="today">Hoje</option><option value="30d">Últimos 30 dias</option><option value="90d">Últimos 90 dias</option><option value="all">Todo o histórico</option><option value="audit" hidden>Semana do relatório</option><option value="custom">Escolher datas</option></select></label>
+        <label>Computador<select name="machine"><option value="">Todos os computadores</option></select></label>
+        <label class="date-field" hidden>De<input type="date" name="start"></label><label class="date-field" hidden>Até<input type="date" name="end"></label>
+        <label>Provedor<select name="provider"><option value="">Todos</option><option>OpenAI</option><option>Anthropic</option><option value="xAI">Grok / xAI</option></select></label>
+        <label>Modelo<select name="model"><option value="">Todos</option></select></label>
+        <label>Projeto<select name="project"><option value="">Todos</option></select></label>
+        <label class="search">Buscar<input type="search" name="q" placeholder="Conversa, projeto ou ID" autocomplete="off"></label>
+        <button type="button" id="clear" class="quiet">Limpar</button>
+      </form>
+      <p id="period-note" class="period-note"></p>
+      <p id="machine-note" class="explanation" hidden></p>
+      <section id="overview" class="view">
+        <section id="machine-panel" class="panel" hidden><div class="section-heading"><h2>Participação por computador</h2></div><div id="machine-list"></div></section>
+        <section class="panel chart-panel" aria-labelledby="chart-title">
+          <div class="section-heading"><h2 id="chart-title">Ao longo dos dias</h2><div id="chart-legend" class="legend"></div><div id="chart-measure" class="segmented" role="group" aria-label="Medida"><button type="button" data-value="tokens" aria-pressed="true">Tokens</button><button type="button" data-value="usd" aria-pressed="false">Custo técnico</button></div></div>
+          <div id="daily-chart" class="daily-chart" aria-label="Consumo por dia"></div>
+          <div id="chart-tip" class="chart-tip" hidden></div>
+        </section>
+        <div class="breakdown"><section class="panel"><h2>Por provedor</h2><div id="providers"></div></section><section class="panel"><h2>Modelos</h2><div id="top-models"></div></section><section class="panel"><h2>Projetos com maior consumo</h2><div id="top-projects"></div></section></div>
+        <details class="coverage"><summary>Cobertura e como interpretar os números</summary><div id="coverage-content"></div></details>
+      </section>
+      <section id="live" class="view" hidden><div class="section-heading"><h2>Atividade recente</h2><span class="muted poll"><i></i>Consulta a cada 8 segundos</span></div><p class="explanation">Companions usam estado do job e presença do processo. Codex usa sinais de início, encerramento e atividade do log. Uma sessão sem atualização não é considerada concluída automaticamente.</p><div id="live-list" class="agent-list"></div></section>
+      <section id="limits" class="view" hidden>
+        <section class="panel limit-intro"><div class="section-heading"><h2>Quanto ainda posso usar?</h2><button id="refresh-limits" type="button" disabled>Atualizar saldos</button></div><p class="explanation">Saldo da conta conectada em cada serviço, compartilhado entre os seus computadores. Os percentuais vêm do provedor e não são calculados pelos tokens do histórico. Contas antigas e coletas importadas não comprovam o saldo atual.</p><label class="inline-label"><input id="live-limits" type="checkbox">Consultar os limites das minhas contas</label><p class="muted">Consulta a cada 5 minutos, sem gerar respostas de IA. Usa o login local somente com o próprio provedor; conversas e arquivos não são enviados. O Claude pode pedir autorização no Chaves ao clicar em Conectar.</p><label id="menu-bar-setting" class="inline-label" hidden><input id="menu-bar" type="checkbox">Mostrar MUR na barra de menus do Mac</label><p id="limits-result" role="status"></p></section>
+        <div id="limit-cards" class="limit-cards" aria-live="polite"></div>
+        <p class="explanation">“Restante” se refere à cota daquele período. Créditos extras, quando informados pelo serviço, aparecem separadamente e não são tratados como dólares. Fechar a janela mantém a barra de menus; use Sair do MUR ou ⌘Q para encerrar.</p>
+      </section>
+      <section id="sessions" class="view" hidden><div class="section-heading"><h2 id="session-count">Conversas</h2><label class="inline-label">Ordenar<select id="session-sort"><option value="tokens">Mais tokens</option><option value="usd">Maior custo técnico</option><option value="recent">Mais recentes</option><option value="title">Título</option></select></label></div><div id="session-list"></div><div class="pagination"><button id="previous" class="quiet">Anterior</button><span id="page-number"></span><button id="next" class="quiet">Próxima</button></div></section>
+      <section id="projects" class="view" hidden><p class="explanation">Atribuição por conversa. Classificações já revisadas são preservadas; as demais usam a pasta de trabalho. Você pode corrigir o projeto na ficha de cada conversa.</p><div id="project-list"></div></section>
+      <section id="settings" class="view" hidden>
+        <section class="panel accounts-panel"><h2>Atualizações do MUR <small id="app-version"></small></h2><p id="update-status" class="explanation" role="status">Abra o aplicativo MUR para verificar atualizações.</p><div class="subscription-actions"><button id="check-updates" type="button" disabled>Verificar atualizações</button><label class="inline-label"><input id="automatic-updates" type="checkbox" disabled>Avisar quando houver novas versões</label></div><p id="update-last-check" class="muted"></p></section>
+        <section class="panel accounts-panel"><h2>Contas e assinaturas</h2><p class="explanation">As contas abaixo foram identificadas nos arquivos locais. O plano pode estar em cache e não comprova o valor da cobrança. Confirme o valor pago; não consultamos faturas nem guardamos suas chaves de acesso.</p><div id="detected-accounts" class="account-list"></div><p class="explanation">Ao trocar de conta, o MUR preserva as contas que já observou. Sair de uma conta não cancela sua assinatura. Registros antigos sem identificação de conta continuam sem atribuição; não são associados ao login atual.</p></section>
+        <div class="settings-grid"><section class="panel"><h2>Histórico de assinaturas</h2><p class="explanation">Cada linha é um período de preço. Quando o valor mudar, encerre o período anterior e adicione outro. O custo proporcional usa somente os dias de vigência, em uma base de 30 dias. Datas desconhecidas ficam a confirmar; o valor atual nunca é aplicado automaticamente ao passado.</p><p class="explanation">Encerrar ou prever o fim da renovação retira a assinatura da previsão futura. Se o acesso pago continuar, informe o primeiro dia sem esse preço. Esse registro é apenas do MUR e não cancela o contrato com o provedor. Pagamentos são cadastrados separadamente, com a data e o total efetivamente pago.</p><form id="settings-form"><div id="subscription-rows"></div><div class="subscription-actions"><button id="add-subscription" class="quiet" type="button">Adicionar período de assinatura</button><button id="no-subscriptions" class="quiet" type="button">Nunca paguei assinaturas</button></div><label>Verificar novos registros<select name="refreshSeconds"><option value="30">A cada 30 segundos</option><option value="60">A cada minuto</option><option value="300">A cada 5 minutos</option><option value="900">A cada 15 minutos</option></select></label><button id="save-subscriptions" type="submit">Salvar histórico</button><p id="settings-result" role="status"></p></form></section>
+        <section class="panel"><h2>Fontes locais</h2><form id="sources-form"><label>Nome deste computador<input name="machineLabel" maxlength="120" required></label><label>Fuso horário<input name="timezone" placeholder="America/Sao_Paulo" required></label><label>Registros Codex<input name="codex" required></label><label>Registros Claude Code<input name="claude" required></label><label>Registros Grok<input name="grok" required></label><button type="submit">Salvar fontes</button><p id="sources-result" role="status"></p></form><div id="sources"></div><h2>O que fica no computador</h2><p class="explanation">Índice, mensagens e configurações são armazenados no seu perfil. Os históricos originais são apenas lidos. Não há telemetria ou chamadas às APIs de modelos.</p><p id="database-count" class="muted"></p></section></div>
+        <section class="panel"><h2>Reunir outros Macs</h2><p class="explanation">Instale o MUR no outro Mac e exporte os últimos sete dias. Transfira o arquivo por AirDrop ou outro canal de sua escolha e importe aqui. O pacote contém identificação de conversas, projetos e consumo; não contém mensagens. A coleta importada é uma fotografia do período, sem sincronização automática.</p><button id="export-machine" type="button">Exportar este Mac · 7 dias</button> <label class="inline-label">Importar outro Mac<input id="import-machine" type="file" accept=".mur,.zlib"></label><p id="transfer-result" role="status"></p></section>
+        <details class="coverage"><summary>Tarifas utilizadas e limitações de custo</summary><p id="rate-note"></p><div id="rates"></div></details>
+      </section>
+      <section id="flow" class="view" hidden>
+        <div class="replay-head">
+          <figure class="replay-ask">
+            <blockquote id="rp-ask">Lendo a transcrição…</blockquote>
+            <figcaption id="rp-byline">Você</figcaption>
+          </figure>
+          <div class="replay-side">
+            <label class="inline-label">Sessão real<select id="rp-session" aria-label="Sessão reproduzida"></select></label>
+            <button id="rp-retry" class="quiet" type="button" hidden>Tentar novamente</button>
+            <dl class="replay-facts">
+              <div><dt>Duração real</dt><dd id="rp-duration">—</dd></div>
+              <div><dt>Tokens</dt><dd id="rp-tokens">—</dd></div>
+              <div><dt>Custo técnico</dt><dd id="rp-usd">—</dd></div>
+              <div><dt>Esforço</dt><dd id="rp-effort">—</dd></div>
+            </dl>
+          </div>
+        </div>
+        <div class="replay-bar">
+          <div class="flow-controls"><button id="flow-play" class="quiet" type="button"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg><span>Pausar</span></button><button id="flow-restart" class="quiet" type="button"><svg class="icon" aria-hidden="true"><use href="#i-refresh"/></svg>Do início</button><div id="flow-speed" class="segmented" role="group" aria-label="Velocidade"><button type="button" data-value="1" aria-pressed="true">1×</button><button type="button" data-value="2" aria-pressed="false">2×</button><button type="button" data-value="4" aria-pressed="false">4×</button></div><button id="flow-full" class="quiet" type="button"><svg class="icon" aria-hidden="true"><use href="#i-expand"/></svg>Tela cheia</button></div>
+          <p class="replay-clock"><b id="rp-clock">—</b><span class="rp-cost-now" id="rp-cost-now"></span><span id="rp-progress"></span></p>
+        </div>
+        <h2 class="rp-sr">Mapa do trabalho</h2>
+        <div id="rp-map" class="replay-map" aria-live="off">
+          <svg id="rp-wires" class="rp-wires" aria-hidden="true"></svg>
+          <article class="rp-node" data-node="user"><header><svg class="icon" aria-hidden="true"><use href="#i-user"/></svg><h3>Você</h3><span class="rp-tag">direção</span></header><p class="rp-count"><b id="rp-n-user">0</b><span id="rp-l-user"> mensagens</span></p><p class="rp-now" id="rp-now-user"></p></article>
+          <article class="rp-node" data-node="opus"><header><svg class="icon" aria-hidden="true"><use href="#i-spark"/></svg><h3>Sessão principal</h3><span class="rp-tag opus" id="rp-model">—</span></header><p class="rp-count"><b id="rp-n-read">0</b><span id="rp-l-read"> leituras · </span><b id="rp-n-edit">0</b><span id="rp-l-edit"> edições · </span><b id="rp-n-tool">0</b><span id="rp-l-tool"> comandos</span></p><p class="rp-now" id="rp-now-opus"></p><p class="rp-spend" id="rp-main-cost"></p><p class="rp-flag" id="rp-compact" hidden><svg class="icon" aria-hidden="true"><use href="#i-compact"/></svg>Contexto compactado; o handoff voltou</p></article>
+          <article class="rp-node" data-node="context"><header><svg class="icon" aria-hidden="true"><use href="#i-file"/></svg><h3>Contexto</h3><span class="rp-tag">lido na fonte</span></header><ul class="rp-files" id="rp-files"></ul></article>
+          <article class="rp-node rp-agents" data-node="agents"><header><svg class="icon" aria-hidden="true"><use href="#i-agents"/></svg><h3>Subagentes</h3><span class="rp-tag" id="rp-agents-sum">—</span></header>
+            <div class="rp-side">
+              <div class="rp-model-rows" id="rp-models" role="group" aria-label="Subagentes por modelo, um ponto por agente"></div>
+              <p class="rp-legend"><span><i></i>na fila</span> <span><i class="run"></i>rodando</span> <span><i class="ok"></i>concluído</span> <span><i class="bad"></i>falhou</span> <span><i class="stop"></i>interrompido</span> <span><i class="ok nested"></i>aberto por outro agente</span></p>
+            </div>
+            <ul class="rp-running" id="rp-running"></ul>
+          </article>
+          <article class="rp-node" data-node="gates"><header><svg class="icon" aria-hidden="true"><use href="#i-gate"/></svg><h3>Prova</h3><span class="rp-tag" id="rp-gates-sum">—</span></header><ul class="rp-gates" id="rp-gates"></ul></article>
+          <article class="rp-node" data-node="ship"><header><svg class="icon" aria-hidden="true"><use href="#i-ship"/></svg><h3>Entrega</h3><span class="rp-tag" id="rp-ship-sum">—</span></header><ul class="rp-modules" id="rp-modules"></ul></article>
+        </div>
+        <div class="replay-lower">
+          <section class="panel rp-timeline"><div class="section-heading"><h2>Linha do tempo</h2><span class="rp-note">pausas acima de 90 s foram encurtadas</span></div><div id="rp-gantt" class="rp-gantt" role="slider" tabindex="0" aria-label="Posição da reprodução" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></div><p class="rp-legend-row"><span><i></i>subagente Sonnet</span><span><i class="opus"></i>subagente Opus</span><span><i class="gate"></i>gate verde</span><span><i class="bad"></i>gate vermelho</span><span><i class="compact"></i>compactação</span><span><i class="cost"></i>custo acumulado</span><span><i class="cost-main"></i>só a sessão principal</span><span>arraste para navegar</span></p></section>
+          <section class="panel rp-feed"><div class="section-heading"><h2>O que aconteceu</h2></div><ol id="rp-feed" class="rp-feed-list"></ol></section>
+        </div>
+        <section class="panel rp-insights" aria-labelledby="rp-insights-title">
+          <div class="section-heading"><h2 id="rp-insights-title">Leituras da sessão</h2><span class="rp-note">calculadas sobre a sessão inteira · estimativas vêm marcadas</span></div>
+          <div class="rp-insight-grid" id="rp-insights"></div>
+        </section>
+        <section class="panel rp-tree" aria-labelledby="rp-tree-title">
+          <div class="section-heading"><h2 id="rp-tree-title">Agentes, modelos e custo</h2><div id="rp-tree-sort" class="segmented" role="group" aria-label="Ordem da tabela"><button type="button" data-value="tree" aria-pressed="true">Quem abriu quem</button><button type="button" data-value="cost" aria-pressed="false">Mais caros</button></div></div>
+          <div class="rp-table-wrap"><table class="rp-agent-table"><thead><tr><th scope="col">Agente</th><th scope="col">Modelo</th><th scope="col">Duração</th><th scope="col">Trabalho</th><th scope="col" class="num">Tokens</th><th scope="col" class="num">Custo</th><th scope="col">Estado</th></tr></thead><tbody id="rp-agent-rows"></tbody></table></div>
+          <button id="rp-tree-more" class="quiet rp-more-btn" type="button" hidden></button>
+        </section>
+        <section class="panel rp-compare" aria-labelledby="rp-compare-title">
+          <div class="section-heading"><h2 id="rp-compare-title">12 sessões recentes do Claude Code</h2><span class="rp-note" id="rp-compare-note" role="status">Calculando…</span><button id="rp-compare-retry" class="quiet" type="button" hidden>Tentar novamente</button></div>
+          <div class="rp-table-wrap"><table class="rp-compare-table"><thead><tr><th scope="col">Data</th><th scope="col">Pedido</th><th scope="col">Ativa</th><th scope="col">Agentes por modelo</th><th scope="col" class="num">Custo</th><th scope="col">Gates</th><th scope="col">Entrega</th></tr></thead><tbody id="rp-compare-rows"></tbody></table></div>
+        </section>
+        <p class="flow-note">Reprodução da transcrição real desta sessão e dos arquivos dos subagentes, lidos neste Mac. Nada aqui envia comandos aos agentes.</p>
+      </section>
+      <section id="detail" class="view" hidden></section>
+    </main>
+    <footer><span id="footer-timezone">Histórico local</span><span id="footer-status"></span></footer>
+  </div>
+</body>
+</html>

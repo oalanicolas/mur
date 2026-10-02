@@ -1,0 +1,14 @@
+[
+  {
+    "name": "cpython-3.13.15+20260929-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "browser_download_url": "https://github.com/astral-sh/python-build-standalone/releases/download/20260929/cpython-3.13.15%2B20260929-aarch64-apple-darwin-install_only_stripped.tar.gz",
+    "size": 25207202,
+    "digest": "sha256:d66c67f16148c7454b1509c32747175f7669c8b8e105b97b92a0000d66af6e6e"
+  },
+  {
+    "name": "cpython-3.13.15+20260929-x86_64-apple-darwin-install_only_stripped.tar.gz",
+    "browser_download_url": "https://github.com/astral-sh/python-build-standalone/releases/download/20260929/cpython-3.13.15%2B20260929-x86_64-apple-darwin-install_only_stripped.tar.gz",
+    "size": 24949564,
+    "digest": "sha256:73b503a2d3f47f0601265d7936744b77dc4ee75d2a3e88a470594a014dcf6822"
+  }
+]

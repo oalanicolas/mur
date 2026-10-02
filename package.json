@@ -1,0 +1,11 @@
+{
+  "name": "mur",
+  "version": "3.0.0-beta.4",
+  "private": true,
+  "description": "Ferramentas de validação da interface do MUR para macOS",
+  "scripts": {
+    "test": "node --check web/app.js && node --check web/flow.js && node --test distribution/test-worker.mjs",
+    "test:ui": "node verify_ui.cjs"
+  },
+  "devDependencies": {"playwright": "1.62.1"}
+}

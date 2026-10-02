@@ -1,0 +1,122 @@
+{
+  "date": "2026-09-30",
+  "rates": [
+    {
+      "model": "gpt-5.6-sol",
+      "input": 4,
+      "cache": 0.4,
+      "write5m": 5,
+      "write1h": null,
+      "output": 20,
+      "url": "https://developers.openai.com/api/docs/models/gpt-5.6-sol"
+    },
+    {
+      "model": "gpt-5.6-luna",
+      "input": 0.2,
+      "cache": 0.02,
+      "write5m": 0.25,
+      "write1h": null,
+      "output": 1.2,
+      "url": "https://developers.openai.com/api/docs/models/gpt-5.6-luna"
+    },
+    {
+      "model": "gpt-6-luna",
+      "input": 0.1,
+      "cache": 0.01,
+      "write5m": 0.125,
+      "write1h": null,
+      "output": 0.5,
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-luna"
+    },
+    {
+      "model": "claude-sonnet-5",
+      "input": 2,
+      "cache": 0.2,
+      "write5m": 2.5,
+      "write1h": 4,
+      "output": 10,
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    {
+      "model": "gpt-6-astra",
+      "input": 10,
+      "cache": 1,
+      "write5m": 12.5,
+      "write1h": null,
+      "output": 50,
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-astra"
+    },
+    {
+      "model": "gpt-6.1-sol",
+      "input": 2,
+      "cache": 0.1,
+      "write5m": 2.5,
+      "write1h": null,
+      "output": 10,
+      "url": "https://developers.openai.com/api/docs/models/gpt-6.1-sol"
+    },
+    {
+      "model": "gpt-6-sol",
+      "input": 2,
+      "cache": 0.2,
+      "write5m": 2.5,
+      "write1h": null,
+      "output": 10,
+      "url": "https://developers.openai.com/api/docs/models/gpt-6-sol"
+    },
+    {
+      "model": "gpt-5.5",
+      "input": 5,
+      "cache": 0.5,
+      "write5m": null,
+      "write1h": null,
+      "output": 30,
+      "url": "https://developers.openai.com/api/docs/models/gpt-5.5"
+    },
+    {
+      "model": "gpt-5.6-terra",
+      "input": 2,
+      "cache": 0.2,
+      "write5m": 2.5,
+      "write1h": null,
+      "output": 12,
+      "url": "https://developers.openai.com/api/docs/models/gpt-5.6-terra"
+    },
+    {
+      "model": "claude-fable-5-1",
+      "input": 10,
+      "cache": 0.25,
+      "write5m": 12.5,
+      "write1h": 20,
+      "output": 50,
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "input": 2,
+      "cache": 0.2,
+      "write5m": 2.5,
+      "write1h": 4,
+      "output": 10,
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "input": 4,
+      "cache": 0.2,
+      "write5m": 5,
+      "write1h": 8,
+      "output": 20,
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing"
+    },
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "input": 1,
+      "cache": 0.1,
+      "write5m": 1.25,
+      "write1h": 2,
+      "output": 5,
+      "url": "https://platform.claude.com/docs/en/about-claude/pricing"
+    }
+  ]
+}
