@@ -130,7 +130,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 def fetch_json(url, token, headers=None):
     request = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + token, 'Accept': 'application/json',
-                                                  'User-Agent': 'MUR/3.0.0-beta.4', **(headers or {})})
+                                                  'User-Agent': 'MUR/3.0.0-beta.5', **(headers or {})})
     try:
         with urllib.request.build_opener(NoRedirect()).open(request, timeout=15) as response:
             body = response.read(1024 * 1024 + 1)
@@ -228,6 +228,7 @@ class LimitMonitor:
         self.wake = threading.Event()
         self.pending = False
         self.allow_claude_prompt = False
+        self.claude_keychain_connected = False
 
     def request_refresh(self, connect_claude=False):
         with self.lock:
@@ -254,17 +255,19 @@ class LimitMonitor:
         credentials = read_metadata(source / '.credentials.json')
         if not credentials and source == self.store.home / '.claude':
             executable = os.environ.get('MUR_NATIVE_EXECUTABLE')
-            if executable:
+            if executable and (interactive or self.claude_keychain_connected):
+                self.claude_keychain_connected = False
                 try:
                     result = subprocess.run([executable, '--claude-credential', 'interactive' if interactive else 'silent'],
                                             capture_output=True, timeout=45 if interactive else 5)
                     if result.returncode == 0:
                         credentials = json.loads(result.stdout)
+                        self.claude_keychain_connected = True
                 except (OSError, ValueError, subprocess.TimeoutExpired):
                     pass
         oauth = credentials.get('claudeAiOauth') if isinstance(credentials, dict) else None
         if not isinstance(oauth, dict) or not isinstance(oauth.get('accessToken'), str):
-            raise LimitError('connectionRequired', 'Conecte o Claude para autorizar a leitura do login no Chaves do macOS.')
+            raise LimitError('connectionRequired', 'Saldo do Claude opcional. Conecte para autorizar o acesso ao login no Chaves; histórico, tokens e custos funcionam sem essa conexão.')
         expiry = instant(oauth.get('expiresAt'))
         if expiry is not None and expiry <= time.time():
             raise LimitError('loginRequired', 'O login do Claude expirou. Abra o Claude Code e entre novamente.')

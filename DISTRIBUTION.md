@@ -1,6 +1,6 @@
 # MUR — Model Usage Reports
 
-3.0.0 beta 4 · macOS 13 ou superior · Apple Silicon e Intel.
+3.0.0 beta 5 · macOS 13 ou superior · Apple Silicon e Intel.
 
 ## Instalação
 
@@ -26,7 +26,7 @@ Filtros, navegação e ações demoradas mostram um indicador de carregamento. O
 
 Abra **Uso disponível** e ative **Consultar saldos das contas conectadas**. O MUR consulta o percentual restante e a próxima renovação usando os logins que já existem neste Mac. Não é necessário informar uma chave de API. As consultas ocorrem a cada cinco minutos, inclusive com a janela fechada, e podem ser desativadas nessa tela.
 
-Codex precisa estar instalado e autenticado. Para Claude, clique em **Conectar Claude** se o MUR solicitar acesso ao login no Chaves do macOS; autorize no diálogo do sistema. Se o login de um provedor expirou, entre novamente no aplicativo dele. Uma conta detectada nos registros não garante que o serviço de saldo esteja disponível. Saldo desconhecido não é zero; o último valor conhecido fica marcado como desatualizado quando a consulta falha ou a data de renovação passa. Créditos adicionais do Codex são créditos informados pelo serviço, não dólares.
+Codex precisa estar instalado e autenticado. O saldo do Claude é opcional: histórico, tokens e custos funcionam sem conectar. O MUR só acessa o Chaves depois de clicar em **Conectar Claude**; essa conexão vale enquanto o aplicativo estiver aberto. O macOS pode pedir autorização nesse momento, e você pode negar e continuar usando o MUR. As consultas automáticas não abrem pedidos de senha nem tentam desbloquear o Chaves. Se você negar ou a leitura falhar, o MUR aguarda uma nova conexão explícita; os outros provedores continuam funcionando. Se o login de um provedor expirou, entre novamente no aplicativo dele. Uma conta detectada nos registros não garante que o serviço de saldo esteja disponível. Saldo desconhecido não é zero; o último valor conhecido fica marcado como desatualizado quando a consulta falha ou a data de renovação passa. Créditos adicionais do Codex são créditos informados pelo serviço, não dólares.
 
 O ícone MUR na barra de menus mostra o saldo do Codex quando disponível; no menu, aparecem os demais provedores e as renovações. O valor destacado corresponde ao período mais restrito. A opção **Mostrar MUR na barra de menus** permite ocultar o item. Fechar a janela mantém o monitor funcionando; **⌘Q** encerra o aplicativo e as consultas. Saldos são das contas atuais deste Mac: históricos importados e contas antigas não fornecem saldo ao vivo.
 

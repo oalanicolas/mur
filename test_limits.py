@@ -157,6 +157,38 @@ class MonitorTests(unittest.TestCase):
                 self.monitor.claude_token(self.root / 'other-claude', True)
             native.assert_not_called()
 
+    def test_denied_keychain_access_waits_for_explicit_connection(self):
+        source = self.store.home / '.claude'
+        credential = {'claudeAiOauth': {'accessToken': 'SYNTHETIC-TOKEN', 'expiresAt': 100000}}
+        with patch.dict('os.environ', {'MUR_NATIVE_EXECUTABLE': '/fake/MUR'}), patch('limits.subprocess.run') as native:
+            native.return_value = Mock(returncode=1, stdout=b'')
+            for _ in range(3):
+                with self.assertRaises(LimitError) as caught:
+                    self.monitor.claude_token(source, False)
+                self.assertEqual(caught.exception.status, 'connectionRequired')
+            native.assert_not_called()
+            with self.assertRaises(LimitError):
+                self.monitor.claude_token(source, True)
+            self.assertEqual(native.call_args.args[0][-1], 'interactive')
+            with self.assertRaises(LimitError):
+                self.monitor.claude_token(source, False)
+            self.assertEqual(native.call_count, 1)
+            native.return_value = Mock(returncode=0, stdout=json.dumps(credential).encode())
+            self.assertEqual(self.monitor.claude_token(source, True), 'SYNTHETIC-TOKEN')
+            self.assertEqual(self.monitor.claude_token(source, False), 'SYNTHETIC-TOKEN')
+            self.assertEqual(native.call_args.args[0][-1], 'silent')
+
+    def test_keychain_timeout_waits_for_explicit_connection(self):
+        source = self.store.home / '.claude'
+        self.monitor.claude_keychain_connected = True
+        with patch.dict('os.environ', {'MUR_NATIVE_EXECUTABLE': '/fake/MUR'}), patch('limits.subprocess.run') as native:
+            import subprocess
+            native.side_effect = subprocess.TimeoutExpired('/fake/MUR', 5)
+            for _ in range(2):
+                with self.assertRaises(LimitError):
+                    self.monitor.claude_token(source, False)
+            self.assertEqual(native.call_count, 1)
+
     def test_claude_identity_must_match_before_usage_is_requested(self):
         with patch.object(self.monitor, 'claude_token', return_value='PRIVATE-TOKEN'), patch('limits.fetch_json') as request:
             request.return_value = {'account': {'uuid': 'someone-else'}, 'organization': {'uuid': 'organization'}}

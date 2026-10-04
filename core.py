@@ -573,7 +573,7 @@ class Store:
         return {'progress': self.progress, 'metadata': metadata, 'counts': counts, 'bounds': bounds,
                 'accounts': self.accounts.snapshot(self.home,self.settings['sources']), 'limits': self.limits.snapshot(),
                 'settings': self.settings, 'imports': imports, 'timezone': str(self.timezone), 'machine': self.settings['machineLabel'],
-                'machines': machines, 'detectedSources': detected, 'hasReport': (self.data_dir / 'report.html').is_file(), 'version': '3.0.0-beta.4'}
+                'machines': machines, 'detectedSources': detected, 'hasReport': (self.data_dir / 'report.html').is_file(), 'version': '3.0.0-beta.5'}
 
     def live(self):
         now = time.time()

@@ -1,15 +1,47 @@
 import AppKit
 import Security
 
+func readCredential(service: String, interactive: Bool, keychain: SecKeychain? = nil) -> (OSStatus, Data?) {
+    var previous: DarwinBoolean = false
+    if !interactive {
+        // File-based login keychains need the legacy API to reliably suppress authentication UI.
+        guard SecKeychainGetUserInteractionAllowed(&previous) == errSecSuccess,
+              SecKeychainSetUserInteractionAllowed(false) == errSecSuccess else {
+            return (errSecInteractionNotAllowed, nil)
+        }
+    }
+    defer {
+        if !interactive { SecKeychainSetUserInteractionAllowed(previous.boolValue) }
+    }
+    var target: CFTypeRef? = keychain
+    if !interactive {
+        var searchList: CFArray?
+        if let keychain {
+            searchList = [keychain] as CFArray
+        } else if SecKeychainCopySearchList(&searchList) != errSecSuccess {
+            return (errSecInteractionNotAllowed, nil)
+        }
+        let unlocked = (searchList as? [SecKeychain] ?? []).filter {
+            var state: SecKeychainStatus = 0
+            return SecKeychainGetStatus($0, &state) == errSecSuccess && state & UInt32(kSecUnlockStateStatus) != 0
+        }
+        // Password lookup can auto-unlock a locked keychain even when interaction is disabled.
+        guard !unlocked.isEmpty else { return (errSecInteractionNotAllowed, nil) }
+        target = unlocked as CFArray
+    }
+    var length: UInt32 = 0
+    var bytes: UnsafeMutableRawPointer?
+    let status = service.withCString {
+        SecKeychainFindGenericPassword(target, UInt32(service.utf8.count), $0, 0, nil, &length, &bytes, nil)
+    }
+    guard status == errSecSuccess, let bytes else { return (status, nil) }
+    defer { SecKeychainItemFreeContent(nil, bytes) }
+    return (status, Data(bytes: bytes, count: Int(length)))
+}
+
 func claudeCredential(interactive: Bool) -> Int32 {
-    let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword,
-                               kSecAttrService as String: "Claude Code-credentials",
-                               kSecMatchLimit as String: kSecMatchLimitOne,
-                               kSecReturnData as String: true,
-                               kSecUseAuthenticationUI as String: interactive ? kSecUseAuthenticationUIAllow : kSecUseAuthenticationUIFail]
-    var result: CFTypeRef?
-    let status = SecItemCopyMatching(query as CFDictionary, &result)
-    guard status == errSecSuccess, let data = result as? Data,
+    let (status, data) = readCredential(service: "Claude Code-credentials", interactive: interactive)
+    guard status == errSecSuccess, let data,
           (try? JSONSerialization.jsonObject(with: data)) is [String: Any] else { return 1 }
     FileHandle.standardOutput.write(data)
     return 0

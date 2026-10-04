@@ -1,5 +1,6 @@
 import AppKit
 import WebKit
+import Security
 
 @MainActor
 func validateNativeApp(_ app: AppDelegate) async {
@@ -21,6 +22,7 @@ func validateNativeApp(_ app: AppDelegate) async {
     }
     do {
         try FileManager.default.createDirectory(at: output, withIntermediateDirectories: true)
+        try validateCredentialAccess(output, check: check)
         let browser = app.primary.browser
         try await wait("typeof appState !== 'undefined' && appState?.settings.setupComplete === false && !document.querySelector('#welcome').hidden")
         for _ in 0..<30 {
@@ -138,4 +140,46 @@ func validateNativeApp(_ app: AppDelegate) async {
         app.applicationWillTerminate(Notification(name:NSApplication.willTerminateNotification))
         exit(1)
     }
+}
+
+func validateCredentialAccess(_ output: URL, check: (Bool, String) throws -> Void) throws {
+    var searchList: CFArray?
+    try check(SecKeychainCopySearchList(&searchList) == errSecSuccess, "Teste do Chaves preserva a lista original")
+    defer { if let searchList { SecKeychainSetSearchList(searchList) } }
+    let password = UUID().uuidString
+    var keychain: SecKeychain?
+    let status = password.withCString { bytes in
+        SecKeychainCreate(output.appendingPathComponent("synthetic.keychain").path, UInt32(password.utf8.count), bytes, false, nil, &keychain)
+    }
+    try check(status == errSecSuccess && keychain != nil, "Credencial de teste em Chaves temporário isolado")
+    guard let keychain else { return }
+    defer { SecKeychainDelete(keychain) }
+    let service = "MUR synthetic validation"
+    let data = Data("synthetic credential".utf8)
+    let item: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
+                               kSecAttrAccount as String: "synthetic", kSecValueData as String: data,
+                               kSecUseKeychain as String: keychain]
+    try check(SecItemAdd(item as CFDictionary, nil) == errSecSuccess, "Credencial sintética adicionada sem acessar logins pessoais")
+    let (success, value) = readCredential(service: service, interactive: false, keychain: keychain)
+    try check(success == errSecSuccess && value == data, "Leitura silenciosa funciona quando já autorizada")
+    var access: SecAccess?
+    try check(SecAccessCreate("MUR synthetic restricted" as CFString, [] as CFArray, &access) == errSecSuccess && access != nil,
+              "Credencial sintética exige autorização para leitura")
+    var restrictedItem = item
+    restrictedItem[kSecAttrService as String] = service + " restricted"
+    restrictedItem[kSecAttrAccess as String] = access
+    try check(SecItemAdd(restrictedItem as CFDictionary, nil) == errSecSuccess, "Credencial restrita adicionada ao Chaves isolado")
+    let (denied, secret) = readCredential(service: service + " restricted", interactive: false, keychain: keychain)
+    try check(denied != errSecSuccess && secret == nil, "Permissão ausente retorna sem diálogo, mesmo com Chaves desbloqueado (status \(denied))")
+    try check(SecKeychainLock(keychain) == errSecSuccess, "Chaves de teste bloqueado para exigir autenticação")
+    var before: DarwinBoolean = false
+    try check(SecKeychainGetUserInteractionAllowed(&before) == errSecSuccess, "Preferência de interação capturada antes da leitura")
+    let started = Date()
+    for _ in 0..<3 {
+        let (failure, value) = readCredential(service: service, interactive: false, keychain: keychain)
+        try check(failure != errSecSuccess && value == nil, "Chaves bloqueado retorna sem diálogo ou credencial (status \(failure))")
+    }
+    var after: DarwinBoolean = false
+    try check(SecKeychainGetUserInteractionAllowed(&after) == errSecSuccess && before.boolValue == after.boolValue && Date().timeIntervalSince(started) < 3,
+              "Leituras repetidas falham imediatamente e restauram a preferência do processo")
 }

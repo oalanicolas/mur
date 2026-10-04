@@ -304,7 +304,7 @@ function renderLimits(){
     for(const credit of row.credits)card.append(el('p',credit.label+': '+number(credit.balance)+' créditos','limit-credit'));
     if(row.status!=='ready')card.append(el('p',row.message,'explanation'));
     if(account.provider==='Anthropic'&&row.status==='connectionRequired')card.append(button('Conectar Claude',async event=>{
-      $('#limits-result').textContent='Autorize a leitura do login do Claude no diálogo do macOS, se solicitado.';
+      $('#limits-result').textContent='Conexão opcional para consultar o saldo do Claude. O macOS pode pedir autorização; você pode negar e continuar usando o MUR.';
       try{await runAction(event.currentTarget,'Conectando Claude…',async()=>{await api('/api/limits/refresh',{connectClaude:true});await loadState();});}catch(e){error(e.message);}
     }));
     card.append(el('small',row.lastSuccess?'Saldo consultado em '+datetime(row.lastSuccess):'Saldo ainda não disponível','muted'));target.append(card);
