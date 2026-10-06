@@ -23,7 +23,7 @@ def import_packet(store, packet):
     if packet.get('version') != 1 or not isinstance(machine, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,80}', machine):
         raise ValueError('Formato ou computador não reconhecido.')
     if machine in ('local', store.settings['deviceId']):
-        raise ValueError('Este pacote pertence ao próprio computador. Importe-o no outro Mac.')
+        raise ValueError('Este pacote pertence ao próprio computador. Importe-o no outro computador.')
     start, end = float(packet['start']), float(packet['end'])
     if not math.isfinite(start+end) or start <= 0 or abs(end-start-7*86400) > 1:
         raise ValueError('O pacote precisa abranger exatamente sete dias.')

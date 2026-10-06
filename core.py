@@ -3,6 +3,8 @@ import datetime as dt
 import hashlib
 import json
 import os
+import socket
+import sys
 from pathlib import Path
 import re
 import sqlite3
@@ -17,6 +19,9 @@ from limits import LimitMonitor
 BASE = Path(__file__).resolve().parent
 def system_timezone():
     configured = os.environ.get('MUR_TIMEZONE')
+    if not configured and sys.platform == 'win32':
+        from tzlocal import get_localzone_name
+        configured = get_localzone_name()
     local = str(Path('/etc/localtime').resolve())
     name = configured or (local.split('/zoneinfo/', 1)[1] if '/zoneinfo/' in local else 'UTC')
     try:
@@ -29,6 +34,30 @@ TZ = system_timezone()
 PROVIDERS = ('OpenAI', 'Anthropic', 'xAI')
 UNITS = ('input', 'cache', 'write', 'write1h', 'output', 'reasoning')
 COUNTERS = ('input_tokens', 'cached_input_tokens', 'cache_write_input_tokens', 'output_tokens', 'reasoning_output_tokens')
+
+
+def process_present(pid):
+    if sys.platform == 'win32':
+        import ctypes
+        from ctypes import wintypes
+        kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+        kernel.OpenProcess.argtypes = (wintypes.DWORD, wintypes.BOOL, wintypes.DWORD)
+        kernel.OpenProcess.restype = wintypes.HANDLE
+        kernel.GetExitCodeProcess.argtypes = (wintypes.HANDLE, ctypes.POINTER(wintypes.DWORD))
+        kernel.CloseHandle.argtypes = (wintypes.HANDLE,)
+        handle = kernel.OpenProcess(0x1000, False, pid)
+        if not handle:
+            return False
+        try:
+            code = wintypes.DWORD()
+            return bool(kernel.GetExitCodeProcess(handle, ctypes.byref(code))) and code.value == 259
+        finally:
+            kernel.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+        return True
+    except (ProcessLookupError, PermissionError):
+        return False
 
 
 def timestamp(value):
@@ -117,7 +146,9 @@ class Connection(sqlite3.Connection):
 class Store:
     def __init__(self, data_dir=None, home=None):
         self.home = Path(home or os.environ.get('MUR_HOME') or Path.home())
-        self.data_dir = Path(data_dir or os.environ.get('MUR_DATA_DIR') or self.home / 'Library/Application Support/MUR')
+        default_profile = (Path(os.environ.get('LOCALAPPDATA', str(self.home / 'AppData/Local'))) / 'MUR'
+                           if sys.platform == 'win32' else self.home / 'Library/Application Support/MUR')
+        self.data_dir = Path(data_dir or os.environ.get('MUR_DATA_DIR') or default_profile)
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.data_dir.chmod(0o700)
         self.db_path = self.data_dir / 'agents.sqlite3'
@@ -130,7 +161,7 @@ class Store:
         pricing = read_json(BASE / 'pricing.json', {})
         defaults = {'monthly': {p: 0 for p in PROVIDERS}, 'subscriptions': [], 'billingReviewed': False, 'setupComplete': self.db_path.exists(),
                     'rates': pricing.get('rates', []), 'ratesDate': pricing.get('date', ''), 'refreshSeconds': 60, 'liveLimitsEnabled': False,
-                    'timezone': str(TZ), 'deviceId': uuid.uuid4().hex, 'machineLabel': os.uname().nodename.removesuffix('.local'),
+                    'timezone': str(TZ), 'deviceId': uuid.uuid4().hex, 'machineLabel': socket.gethostname().removesuffix('.local'),
                     'sources': {'codex': str(self.home / '.codex'), 'claude': str(self.home / '.claude'), 'grok': str(self.home / '.grok')}}
         previous = read_json(self.settings_path, {})
         self.settings = defaults | previous
@@ -573,7 +604,8 @@ class Store:
         return {'progress': self.progress, 'metadata': metadata, 'counts': counts, 'bounds': bounds,
                 'accounts': self.accounts.snapshot(self.home,self.settings['sources']), 'limits': self.limits.snapshot(),
                 'settings': self.settings, 'imports': imports, 'timezone': str(self.timezone), 'machine': self.settings['machineLabel'],
-                'machines': machines, 'detectedSources': detected, 'hasReport': (self.data_dir / 'report.html').is_file(), 'version': '3.0.0-beta.5'}
+                'machines': machines, 'detectedSources': detected, 'hasReport': (self.data_dir / 'report.html').is_file(), 'version': '3.0.0-beta.6',
+                'platform': 'windows' if sys.platform == 'win32' else 'macos' if sys.platform == 'darwin' else 'other'}
 
     def live(self):
         now = time.time()
@@ -585,11 +617,7 @@ class Store:
         for j in jobs:
             live = False
             if isinstance(j['pid'], int) and j['pid'] > 1:
-                try:
-                    os.kill(j['pid'], 0)
-                    live = True
-                except (ProcessLookupError, PermissionError):
-                    pass
+                live = process_present(j['pid'])
             declared = j['status'] in ('running', 'pending', 'queued', 'starting')
             status = 'running' if declared and live else 'unconfirmed' if declared else j['status']
             result.append(dict(j, state=status, evidence='Job em execução e processo presente' if status == 'running' else 'Estado gravado pelo companion; processo ausente ou sem confirmação' if declared else 'Estado gravado pelo companion', last_ts=j['updated']))

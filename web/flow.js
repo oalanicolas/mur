@@ -561,7 +561,7 @@
     libraryEmpty=!hasSession;const retryEmpty=libraryEmpty&&libraryRefreshQueued;libraryRefreshQueued=false;
     view.classList.toggle('rp-empty',!hasSession);
     for(const button of view.querySelectorAll('.flow-controls button'))button.disabled=!hasSession;
-    if(!hasSession){playing=false;byId('rp-ask').textContent='Nenhuma transcrição local do Claude Code encontrada. Comece uma análise ou confira a pasta em Configurações.';byId('rp-byline').textContent='O fluxo aparece quando há uma sessão compatível neste Mac.';if(retryEmpty){loadedId='';sync();}return;}
+    if(!hasSession){playing=false;byId('rp-ask').textContent='Nenhuma transcrição local do Claude Code encontrada. Comece uma análise ou confira a pasta em Configurações.';byId('rp-byline').textContent='O fluxo aparece quando há uma sessão compatível neste computador.';if(retryEmpty){loadedId='';sync();}return;}
     await load(id);loadCompare();
   }
   function sync() {

@@ -3,9 +3,10 @@ import json
 import math
 import os
 from pathlib import Path
-import selectors
+import queue
 import shutil
 import subprocess
+import sys
 import threading
 import time
 import urllib.error
@@ -130,7 +131,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 def fetch_json(url, token, headers=None):
     request = urllib.request.Request(url, headers={'Authorization': 'Bearer ' + token, 'Accept': 'application/json',
-                                                  'User-Agent': 'MUR/3.0.0-beta.5', **(headers or {})})
+                                                  'User-Agent': 'MUR/3.0.0-beta.6', **(headers or {})})
     try:
         with urllib.request.build_opener(NoRedirect()).open(request, timeout=15) as response:
             body = response.read(1024 * 1024 + 1)
@@ -152,6 +153,17 @@ def fetch_json(url, token, headers=None):
 
 
 def codex_binary(home):
+    if sys.platform == 'win32':
+        candidates = [home / '.local/bin/codex.exe', home / '.cargo/bin/codex.exe']
+        located = shutil.which('codex.exe')
+        if located:
+            candidates.append(Path(located))
+        shim = shutil.which('codex')
+        if shim:
+            vendor = 'vendor/x86_64-pc-windows-msvc/codex/codex.exe'
+            packages = Path(shim).parent / 'node_modules/@openai/codex'
+            candidates.extend((packages / vendor, packages / 'node_modules/@openai/codex-win32-x64' / vendor))
+        return next((str(p) for p in candidates if p.is_file()), None)
     candidates = [Path('/Applications/ChatGPT.app/Contents/Resources/codex-cli/bin/codex'),
                   Path('/Applications/Codex.app/Contents/Resources/codex'),
                   Path('/Applications/Codex.app/Contents/Resources/codex-cli/bin/codex'),
@@ -169,38 +181,45 @@ def read_codex(home, source):
     binary = codex_binary(home)
     if not binary:
         raise LimitError('unavailable', 'Instale ou abra o Codex neste Mac para consultar os limites.')
-    environment = {'HOME': str(home), 'PATH': '/usr/bin:/bin:/usr/sbin:/sbin', 'CODEX_HOME': str(source)}
+    environment = {'HOME': str(home), 'PATH': os.environ.get('PATH', '') if sys.platform == 'win32' else '/usr/bin:/bin:/usr/sbin:/sbin', 'CODEX_HOME': str(source)}
+    if sys.platform == 'win32':
+        for key in ('SYSTEMROOT', 'WINDIR', 'USERPROFILE', 'APPDATA', 'LOCALAPPDATA', 'TEMP', 'TMP'):
+            if key in os.environ:
+                environment[key] = os.environ[key]
     process = subprocess.Popen([binary, 'app-server'], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                               stderr=subprocess.DEVNULL, env=environment)
-    selector = selectors.DefaultSelector()
-    selector.register(process.stdout, selectors.EVENT_READ)
-    buffer = b''
+                               stderr=subprocess.DEVNULL, env=environment, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+    responses = queue.Queue(maxsize=200)
+
+    def read_responses():
+        while True:
+            line = process.stdout.readline(2 * 1024 * 1024 + 1)
+            if not line or len(line) > 2 * 1024 * 1024:
+                responses.put(None)
+                return
+            responses.put(line)
+
+    reader = threading.Thread(target=read_responses, daemon=True, name='codex-responses')
+    reader.start()
 
     def request(identifier, method, params=None):
-        nonlocal buffer
         process.stdin.write((json.dumps({'id': identifier, 'method': method, **({'params': params} if params is not None else {})}) + '\n').encode())
         process.stdin.flush()
         deadline = time.monotonic() + 20
         while time.monotonic() < deadline:
-            if b'\n' not in buffer:
-                if not selector.select(timeout=.5):
-                    continue
-                chunk = os.read(process.stdout.fileno(), 65536)
-                if not chunk:
-                    break
-                buffer += chunk
-                if len(buffer) > 2 * 1024 * 1024:
-                    break
-            while b'\n' in buffer:
-                line, buffer = buffer.split(b'\n', 1)
-                try:
-                    value = json.loads(line)
-                except ValueError:
-                    continue
-                if value.get('id') == identifier:
-                    if 'error' in value:
-                        raise LimitError('unavailable', 'O Codex não conseguiu consultar os limites desta conta.')
-                    return value.get('result') or {}
+            try:
+                line = responses.get(timeout=.5)
+            except queue.Empty:
+                continue
+            if line is None:
+                break
+            try:
+                value = json.loads(line)
+            except ValueError:
+                continue
+            if value.get('id') == identifier:
+                if 'error' in value:
+                    raise LimitError('unavailable', 'O Codex não conseguiu consultar os limites desta conta.')
+                return value.get('result') or {}
         raise LimitError('unavailable', 'A consulta ao Codex demorou mais que o esperado.')
 
     try:
@@ -209,7 +228,6 @@ def read_codex(home, source):
         process.stdin.flush()
         return request(2, 'account/rateLimits/read')
     finally:
-        selector.close()
         process.terminate()
         try:
             process.wait(timeout=3)
@@ -267,6 +285,8 @@ class LimitMonitor:
                     pass
         oauth = credentials.get('claudeAiOauth') if isinstance(credentials, dict) else None
         if not isinstance(oauth, dict) or not isinstance(oauth.get('accessToken'), str):
+            if sys.platform == 'win32':
+                raise LimitError('loginRequired', 'Saldo do Claude opcional. Entre no Claude Code neste computador; histórico, tokens e custos funcionam sem essa conexão.')
             raise LimitError('connectionRequired', 'Saldo do Claude opcional. Conecte para autorizar o acesso ao login no Chaves; histórico, tokens e custos funcionam sem essa conexão.')
         expiry = instant(oauth.get('expiresAt'))
         if expiry is not None and expiry <= time.time():

@@ -82,7 +82,7 @@ async function loadState(){
     $('#saved-report').hidden=!appState.hasReport;
     $('#welcome').hidden=appState.settings.setupComplete||currentView!=='overview';
     const detected=Object.entries(appState.detectedSources).filter(([,exists])=>exists).map(([name])=>({codex:'Codex',claude:'Claude Code',grok:'Grok'}[name]));
-    $('#detected-sources').textContent=detected.length?'Pastas encontradas: '+detected.join(', ')+'.':'Nenhuma pasta de registros encontrada. Você pode configurar as fontes ou importar a coleta de outro Mac.';
+    $('#detected-sources').textContent=detected.length?'Pastas encontradas: '+detected.join(', ')+'.':'Nenhuma pasta de registros encontrada. Você pode configurar as fontes ou importar a coleta de outro computador.';
     renderAccounts();
     renderUpdates();
     renderLimits();
@@ -197,7 +197,7 @@ function renderOverview(data){
     number(appState?.counts.skipped_usage)+' registros com categorias inconsistentes ou sem uma chamada datada foram identificados no índice. Esses registros não entram nos totais.',
     'Tabela de tarifas com referência em '+(appState?.settings.ratesDate||'data não informada')+'. Grok usa custo registrado pelo CLI. Contextos OpenAI acima de 272 mil tokens ficam sem estimativa quando não há regra de tarifa específica.',
     'Tokens incluem entrada, leitura e gravação de cache e saída. Raciocínio é parte da saída e não é somado duas vezes. Contadores Codex são reconciliados entre arquivos; Claude usa IDs de mensagem; Grok usa turnos deduplicados.',
-    'Este computador é atualizado pelos registros locais. Outros Macs entram pelas coletas importadas em Configurações. Conversas exclusivamente na web e despesas de mídia sem recibo não entram automaticamente.',
+    'Este computador é atualizado pelos registros locais. Outros computadores entram pelas coletas importadas em Configurações. Conversas exclusivamente na web e despesas de mídia sem recibo não entram automaticamente.',
     number(data.duplicateEvents||0)+' eventos encontrados em mais de um computador são contados uma vez, com preferência pelo registro local. Sessões compartilhadas podem aparecer em mais de uma origem, mas contam uma vez no total. As mensalidades são globais e não são duplicadas.',
     'Os logs originais são somente leitura. Mensagens textuais são consultáveis; ferramentas, raciocínio interno, anexos e mensagens maiores que 4 MB não são exibidos. Recibos efêmeros preservados na auditoria permanecem identificados pela sua origem.'
   ];
@@ -255,7 +255,13 @@ async function renderLive(version=sequence,signal){
 async function renderUpdates(action='status',enabled){
   $('#app-version').textContent=appState?.version||'';
   const bridge=window.webkit?.messageHandlers?.murUpdates;
-  if(!bridge)return;
+  if(!bridge){
+    if(appState?.platform==='windows'){
+      $('#update-status').textContent='Nesta beta Windows, atualize instalando a nova versão. Histórico e configurações são preservados.';
+      $('#check-updates').disabled=true;$('#automatic-updates').disabled=true;
+    }
+    return;
+  }
   try{
     const state=await bridge.postMessage({action,...(typeof enabled==='boolean'?{enabled}:{})});
     $('#app-version').textContent=state.version;
@@ -287,7 +293,7 @@ function renderLimits(){
   const signature=JSON.stringify([state,accounts]);if(signature===limitsSignature)return;limitsSignature=signature;
   const target=$('#limit-cards');target.replaceChildren();
   if(!state.enabled){empty(target,'Ative a consulta acima para ver o saldo informado pelos serviços.');return;}
-  if(!accounts.length){empty(target,'Nenhuma conta conectada foi identificada. Entre no Codex, Claude Code ou Grok neste Mac.');return;}
+  if(!accounts.length){empty(target,'Nenhuma conta conectada foi identificada. Entre no Codex, Claude Code ou Grok neste computador.');return;}
   for(const account of accounts){
     const row=state.rows.find(r=>r.accountId===account.id);
     const card=el('article',null,'panel limit-card');card.dataset.provider=account.provider;
@@ -468,7 +474,7 @@ async function loadView({silent=false}={}){
     $('#period-note').textContent=datetime(data.start)+' → '+datetime(data.end)+' · '+(appState?.timezone||'fuso local')+' · '+(params.machine?machineName(params.machine):'todos os computadores')+' · '+(params.provider||'todos os provedores')+(appState?.progress.running?' · leitura em andamento':'');
     const remotes=appState?.imports||[];
     $('#machine-note').hidden=!remotes.length;
-    $('#machine-note').textContent=remotes.map(remote=>remote.label+': '+datetime(remote.start)+' → '+datetime(remote.end)+'.').join(' ')+' Atualizar registros verifica este Mac. Para renovar uma coleta importada, exporte novamente no computador de origem.';
+    $('#machine-note').textContent=remotes.map(remote=>remote.label+': '+datetime(remote.start)+' → '+datetime(remote.end)+'.').join(' ')+' Atualizar registros verifica este computador. Para renovar uma coleta importada, exporte novamente no computador de origem.';
     if(currentView==='overview')renderOverview(data);
     if(currentView==='projects')renderProjects(data);
     if(currentView==='sessions')await renderSessions(version,controller.signal);
@@ -517,6 +523,7 @@ async function download(control,path,label){
     }
     const bridge=window.webkit?.messageHandlers?.murExports;
     if(bridge)return bridge.postMessage({action:'save',path});
+    if(window.pywebview?.api?.save_export)return window.pywebview.api.save_export(path,window.pywebview.token);
     const response=await fetch(path);
     if(!response.ok)throw new Error('Não foi possível gerar a exportação. Tente novamente.');
     const blob=await response.blob(),url=URL.createObjectURL(blob),link=el('a');
@@ -558,7 +565,7 @@ $('#sources-form').addEventListener('submit',async event=>{
   catch(e){error(e.message);}
 });
 $('#export-machine').addEventListener('click',async()=>{
-  try{await download($('#export-machine'),'/api/transfer','Exportando este Mac…');}
+  try{await download($('#export-machine'),'/api/transfer','Exportando este computador…');}
   catch(e){$('#transfer-result').textContent=e.message;}
 });
 $('#import-machine').addEventListener('change',async event=>{

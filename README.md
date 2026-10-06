@@ -1,12 +1,16 @@
 # MUR — Model Usage Reports
 
-Aplicativo macOS independente para consultar consumo, conversas, projetos e atividade de agentes a partir dos registros locais de Codex, Claude Code/Companion e Grok CLI/Companion. O guia para quem instala está em [DISTRIBUTION.md](DISTRIBUTION.md).
+Aplicativo independente para macOS e Windows para consultar consumo, conversas, projetos e atividade de agentes a partir dos registros locais de Codex, Claude Code/Companion e Grok CLI/Companion. O guia para quem instala está em [DISTRIBUTION.md](DISTRIBUTION.md).
 
 O projeto fica em `~/Code/mur`, separado de Games. O aplicativo instalado e o perfil de dados têm pastas próprias; mover o código não muda o histórico nem exige migrá-lo novamente.
 
 Código público: [github.com/oalanicolas/mur](https://github.com/oalanicolas/mur). Download da beta: [mur.lendario.ai](https://mur.lendario.ai/).
 
-## Versão 3.0.0 beta 5
+## Versão 3.0.0 beta 6
+
+A primeira edição Windows usa WebView2 em janela nativa, sem barra de endereço, e inclui Python. O instalador `.exe` instala na conta atual, sem pedir administrador, e prepara o WebView2 da Microsoft se ele estiver ausente; essa preparação requer internet. O perfil fica em `%LOCALAPPDATA%\MUR`, fora da pasta instalada. Desinstalar preserva o perfil. Windows 10/11 de 64 bits; novas versões nesta beta são instaladas pelo `.exe`, sem atualizador automático ou item de bandeja. Histórico, filtros, contas, projetos, agentes e exportações usam o mesmo serviço do Mac.
+
+Os itens abaixo descrevem a edição macOS:
 
 - Bundle universal para Apple Silicon e Intel, macOS 13 ou superior.
 - Janela nativa AppKit/WebKit, ícone no Dock e nenhuma barra de endereço.
@@ -45,7 +49,7 @@ Cada assinatura tem períodos de preço: início inclusivo e fim exclusivo, no f
 Requer Python 3.13 ou superior para empacotar (extração segura de tar), Swift/Command Line Tools e ferramentas do macOS. O app distribuído traz seu próprio runtime.
 
 ```sh
-python3 -m unittest -v test_limits test_release test_billing test_accounts test_local test_machines test_replay test_portable
+python3 -m unittest -v test_limits test_release test_billing test_accounts test_local test_machines test_replay test_portable test_windows
 node --test distribution/test-worker.mjs
 node --check web/app.js
 node --check web/flow.js
@@ -60,6 +64,8 @@ python3 build_release.py --updates-config macos/update-channel.json --package
 ```
 
 `installation/latest-build.json` identifica o bundle mais recente. `--validation` compila testes dentro de um app com identificador próprio; esse app não pode ser instalado como versão de uso. A validação nativa executa com perfis sintéticos nas duas arquiteturas, inclusive Intel via Rosetta neste Mac. Não substitui testes em um Mac Intel físico ou em cada versão mínima do macOS.
+
+Em Windows, use Python 3.13, `python -m pip install -r windows/requirements.txt`, `python windows/build.py` e `python windows/verify.py dist/windows/app/MUR/MUR.exe`. Inno Setup 6 gera o instalador por usuário. `.github/workflows/windows.yml` compila em Windows, executa os testes, abre o executável real com perfil sintético e verifica instalação e desinstalação. O pacote é montado com recursos públicos; perfis, históricos e credenciais são rejeitados. A verificação da atividade de processos usa consulta de estado no Windows: `os.kill(pid, 0)` não é usado nesse sistema, pois poderia encerrar o agente observado.
 
 `build_release.py` usa uma lista explícita de arquivos públicos, runtimes com SHA-256 fixado em `macos/runtime-manifest.json`, compilação universal e verificação de assinatura. Rejeita históricos, índices, configurações particulares e referências pessoais no conteúdo próprio do bundle. Os artefatos ficam em `dist/`, acompanhados de SHA256SUMS.txt. Fontes e runtimes levam suas licenças.
 

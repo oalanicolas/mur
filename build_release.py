@@ -12,7 +12,7 @@ import urllib.request
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent
-VERSION = '3.0.0-beta.5'
+VERSION = '3.0.0-beta.6'
 IDENTIFIER = 'app.mur.reports'
 BACKEND = ('core.py', 'server.py', 'replay.py', 'export_machine.py', 'import_machine.py', 'accounts.py', 'billing.py', 'limits.py', 'pricing.json')
 WEB = ('index.html', 'app.js', 'theme.js', 'flow.js', 'flow.css', 'style.css', 'favicon.svg',
@@ -107,9 +107,9 @@ def prepare(destination, validation=False, identity='-', channel=None):
     shutil.copy2(framework_source/'LICENSE', resources/'Sparkle-LICENSE.txt')
     shutil.copy2(ROOT/'macos/sparkle-manifest.json', resources/'sparkle-manifest.json')
     info = {'CFBundleName':'MUR', 'CFBundleDisplayName':'MUR', 'CFBundleIdentifier':IDENTIFIER + ('.validation' if validation else ''),
-            'CFBundleVersion':'3.0.5', 'CFBundleShortVersionString':'3.0.0', 'CFBundleExecutable':'MUR',
+            'CFBundleVersion':'3.0.6', 'CFBundleShortVersionString':'3.0.0', 'CFBundleExecutable':'MUR',
             'CFBundlePackageType':'APPL', 'CFBundleIconFile':'MUR.icns', 'LSMinimumSystemVersion':'13.0',
-            'NSHighResolutionCapable':True, 'NSHumanReadableCopyright':'MUR — Model Usage Reports · beta 5',
+            'NSHighResolutionCapable':True, 'NSHumanReadableCopyright':'MUR — Model Usage Reports · beta 6',
             'MURReleaseVersion':VERSION,
             'NSAppTransportSecurity':{'NSAllowsLocalNetworking':True}}
     if channel and not validation:

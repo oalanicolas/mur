@@ -20,7 +20,7 @@ from import_machine import decode_packet, import_packet
 from accounts import validate_subscriptions
 
 
-def create_server(store, port=4317):
+def create_server(store, port=4317, native_windows=False):
     token = secrets.token_urlsafe(32)
 
     class Handler(BaseHTTPRequestHandler):
@@ -39,7 +39,9 @@ def create_server(store, port=4317):
             if download:
                 self.send_header('Content-Disposition', f'attachment; filename="{download}"')
             if content_type.startswith('text/html') and not self.path.startswith('/report'):
-                self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'")
+                # pywebview creates its native bridge with Function() and evaluates trusted scripts.
+                scripts = "'self' 'unsafe-eval'" if native_windows else "'self'"
+                self.send_header('Content-Security-Policy', f"default-src 'self'; script-src {scripts}; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'self'")
             self.end_headers()
             try:
                 self.wfile.write(body)

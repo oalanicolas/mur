@@ -1,0 +1,66 @@
+name: Build Windows installer
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-2025
+    timeout-minutes: 25
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+      - name: Install build dependencies
+        run: python -m pip install -r windows/requirements.txt
+      - name: Prepare installer compiler
+        shell: pwsh
+        run: |
+          if (!(Test-Path 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe')) {
+            $compilerSetup = Join-Path $env:RUNNER_TEMP 'innosetup-6.7.3.exe'
+            Invoke-WebRequest 'https://github.com/jrsoftware/issrc/releases/download/is-6_7_3/innosetup-6.7.3.exe' -OutFile $compilerSetup
+            if ((Get-FileHash $compilerSetup -Algorithm SHA256).Hash -ne '9c73c3bae7ed48d44112a0f48e66742c00090bdb5bef71d9d3c056c66e97b732') { throw 'Inno Setup integrity verification failed' }
+            $signature = Get-AuthenticodeSignature -LiteralPath $compilerSetup
+            if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notlike '*Pyrsys B.V.*') { throw 'Inno Setup signature verification failed' }
+            $prepared = Start-Process $compilerSetup -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART') -PassThru -Wait
+            if ($prepared.ExitCode -ne 0) { throw 'Inno Setup installation failed' }
+          }
+      - name: Validate backend on Windows
+        env:
+          MUR_TIMEZONE: America/Sao_Paulo
+        run: python -m unittest -q test_limits test_release test_billing test_accounts test_local test_machines test_replay test_portable test_windows
+      - name: Build executable and installer
+        run: python windows/build.py
+      - name: Validate packaged Windows application
+        run: python windows/verify.py dist/windows/app/MUR/MUR.exe
+      - name: Validate installation without admin and preserve user data
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem dist/windows/*-setup.exe | Select-Object -First 1
+          $destination = Join-Path $env:RUNNER_TEMP 'MUR-installed'
+          $process = Start-Process $installer.FullName -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', "/DIR=$destination") -PassThru -Wait
+          if ($process.ExitCode -ne 0) { throw "Installer failed: $($process.ExitCode)" }
+          python windows/verify.py "$destination/MUR.exe"
+          if ($LASTEXITCODE -ne 0) { throw 'Installed application validation failed' }
+          $profile = Join-Path $env:LOCALAPPDATA 'MUR'
+          New-Item -ItemType Directory -Force $profile | Out-Null
+          $canary = Join-Path $profile 'installation-canary.txt'
+          Set-Content $canary 'Synthetic preservation check'
+          $uninstaller = Get-ChildItem $destination/unins*.exe | Select-Object -First 1
+          $removed = Start-Process $uninstaller.FullName -ArgumentList @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART') -PassThru -Wait
+          if ($removed.ExitCode -ne 0 -or !(Test-Path $canary)) { throw 'Uninstall did not preserve the user profile' }
+      - name: Upload verified installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: MUR-Windows-x64
+          path: |
+            dist/windows/*-setup.exe
+            dist/windows/*-portable.zip
+            dist/windows/SHA256SUMS-windows.txt
+            dist/windows/build-windows.json
+          if-no-files-found: error
+          retention-days: 30

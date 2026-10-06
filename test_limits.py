@@ -6,6 +6,7 @@ import tempfile
 import threading
 import unittest
 from unittest.mock import Mock, patch
+from types import SimpleNamespace
 import urllib.error
 
 from accounts import identity
@@ -160,7 +161,7 @@ class MonitorTests(unittest.TestCase):
     def test_denied_keychain_access_waits_for_explicit_connection(self):
         source = self.store.home / '.claude'
         credential = {'claudeAiOauth': {'accessToken': 'SYNTHETIC-TOKEN', 'expiresAt': 100000}}
-        with patch.dict('os.environ', {'MUR_NATIVE_EXECUTABLE': '/fake/MUR'}), patch('limits.subprocess.run') as native:
+        with patch.dict('os.environ', {'MUR_NATIVE_EXECUTABLE': '/fake/MUR'}), patch('limits.sys', SimpleNamespace(platform='darwin')), patch('limits.subprocess.run') as native:
             native.return_value = Mock(returncode=1, stdout=b'')
             for _ in range(3):
                 with self.assertRaises(LimitError) as caught:

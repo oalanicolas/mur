@@ -18,3 +18,5 @@ node_modules/
 *.mur
 *.p12
 *.key
+windows/MUR.ico
+windows/version-info.txt

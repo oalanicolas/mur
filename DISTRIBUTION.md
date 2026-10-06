@@ -1,8 +1,12 @@
 # MUR — Model Usage Reports
 
-3.0.0 beta 5 · macOS 13 ou superior · Apple Silicon e Intel.
+3.0.0 beta 6 · macOS 13 ou superior e Windows 10/11 de 64 bits.
 
 ## Instalação
+
+No Windows, abra `MUR-3.0.0-beta.6-windows-x64-setup.exe`. A instalação é na sua conta, sem senha de administrador. Python está incluído. Se o WebView2 da Microsoft estiver ausente, o instalador o prepara automaticamente; mantenha internet disponível nesse caso. Abra o MUR pelo menu Iniciar. O instalador beta ainda não tem assinatura Authenticode de distribuição; o Windows pode mostrar um aviso de origem desconhecida. Não desative as proteções do sistema.
+
+No Mac, use o DMG universal para Apple Silicon ou Intel:
 
 Abra o DMG e arraste MUR para Aplicativos. Abra o MUR no Finder, Dock ou Spotlight. Python, Homebrew e ferramentas de desenvolvimento já não são necessários.
 
@@ -24,6 +28,8 @@ Filtros, navegação e ações demoradas mostram um indicador de carregamento. O
 
 ## Uso disponível e barra de menus
 
+No Windows, o saldo também é opcional e começa desativado. As contas precisam ter login local compatível. Não há leitura do Chaves do macOS nem item de bandeja nesta primeira beta Windows. Fechar a janela encerra o aplicativo e o serviço local.
+
 Abra **Uso disponível** e ative **Consultar saldos das contas conectadas**. O MUR consulta o percentual restante e a próxima renovação usando os logins que já existem neste Mac. Não é necessário informar uma chave de API. As consultas ocorrem a cada cinco minutos, inclusive com a janela fechada, e podem ser desativadas nessa tela.
 
 Codex precisa estar instalado e autenticado. O saldo do Claude é opcional: histórico, tokens e custos funcionam sem conectar. O MUR só acessa o Chaves depois de clicar em **Conectar Claude**; essa conexão vale enquanto o aplicativo estiver aberto. O macOS pode pedir autorização nesse momento, e você pode negar e continuar usando o MUR. As consultas automáticas não abrem pedidos de senha nem tentam desbloquear o Chaves. Se você negar ou a leitura falhar, o MUR aguarda uma nova conexão explícita; os outros provedores continuam funcionando. Se o login de um provedor expirou, entre novamente no aplicativo dele. Uma conta detectada nos registros não garante que o serviço de saldo esteja disponível. Saldo desconhecido não é zero; o último valor conhecido fica marcado como desatualizado quando a consulta falha ou a data de renovação passa. Créditos adicionais do Codex são créditos informados pelo serviço, não dólares.
@@ -32,11 +38,13 @@ O ícone MUR na barra de menus mostra o saldo do Codex quando disponível; no me
 
 ## Outros computadores
 
-Em cada Mac, conclua a leitura e use **Configurações → Exportar este Mac · 7 dias**. Transfira o arquivo `.mur` e use **Importar outro Mac** no computador onde deseja consolidar. O arquivo contém identificadores, títulos, projetos, caminhos de origem e consumo; mensagens não são incluídas. Compartilhe-o apenas com quem deve receber esses metadados.
+Em cada computador, conclua a leitura e use **Configurações → Exportar este computador · 7 dias**. Transfira o arquivo `.mur` e use **Importar outro computador** onde deseja consolidar. O arquivo contém identificadores, títulos, projetos, caminhos de origem e consumo; mensagens não são incluídas. Compartilhe-o apenas com quem deve receber esses metadados.
 
 Eventos repetidos são deduplicados, com preferência pela cópia local. A janela “7 dias · coleta importada” usa o período do último pacote. Importações anteriores mantêm seus períodos originais, indicados na interface. A coleta é pontual, sem conexão automática entre Macs.
 
 ## Atualizações
+
+No Windows, instale o novo `.exe` por cima da edição anterior. O perfil em `%LOCALAPPDATA%\MUR` é preservado na atualização e na desinstalação; o atualizador automático do Mac não está disponível nesta primeira beta Windows.
 
 Use **MUR → Verificar atualizações…** ou **Configurações → Atualizações do MUR**. Nas edições conectadas ao canal `mur.lendario.ai`, o aplicativo avisa quando há uma nova versão, mostra as novidades e permite instalar e reabrir. Você pode desativar os avisos automáticos. Histórico, contas e configurações ficam no perfil e são preservados ao substituir o aplicativo.
 
@@ -44,7 +52,7 @@ Uma edição sem canal configurado informa essa condição; ela não afirma esta
 
 ## Privacidade e armazenamento
 
-Cada conta do macOS tem seu próprio perfil em `~/Library/Application Support/MUR`. O instalador não contém históricos, contas, mensalidades, relatórios ou configurações de nenhum usuário. Os logs originais são somente leitura. Não há telemetria, upload automático ou chamadas às APIs de modelos.
+Cada usuário tem seu próprio perfil: `~/Library/Application Support/MUR` no macOS e `%LOCALAPPDATA%\MUR` no Windows. O instalador não contém históricos, contas, mensalidades, relatórios ou configurações de nenhum usuário. Os logs originais são somente leitura. Não há telemetria, upload automático ou chamadas às APIs de modelos.
 
 As verificações de atualização acessam o catálogo público e baixam instaladores pelo HTTPS. Não enviam conversas, consumo, credenciais ou perfil de sistema; o servidor recebe os dados normais de uma conexão, como endereço IP e identificação do aplicativo. Se você ativar a consulta de saldos, as credenciais locais são usadas apenas para autenticar pedidos aos serviços dos respectivos provedores. Elas não são enviadas à interface, exportadas, copiadas para o perfil nem para os servidores do MUR. Os metadados de contas ficam no perfil local, com identificadores por hash e e-mails abreviados, sem copiar chaves de acesso.
 
@@ -57,6 +65,8 @@ Custo técnico equivalente é uma estimativa, não uma fatura. A tabela de tarif
 O custo proporcional das assinaturas considera o valor vigente em cada dia, usando uma base de 30 dias. A previsão mensal mostra somente as renovações ainda previstas. Os pagamentos cadastrados mostram cobranças pelas suas datas e nunca são inventados a partir da mensalidade. Consultas com dias parciais incluem pagamentos nas datas tocadas pelo período, sem precisão de horário. Não some custo técnico, proporcional e pagamentos como se fossem três cobranças diferentes.
 
 ## Componentes
+
+No Windows, janela pywebview/WebView2, runtime Python incluído e instalador Inno Setup. O WebView2 é distribuído pela Microsoft. Dependências de build estão fixadas em `windows/requirements.txt`. O ZIP portátil exige WebView2 já instalado; o `.exe` de instalação prepara essa dependência.
 
 Janela AppKit/WebKit e serviço Python incluído no aplicativo. Runtime CPython fornecido pelo projeto python-build-standalone; versões e hashes estão em `Contents/Resources/runtime-manifest.json`. Licenças do Python e componentes acompanham os runtimes. Fontes Geist, Geist Mono e Source Serif são distribuídas sob SIL Open Font License; texto completo em `Contents/Resources/backend/web/fonts/LICENSES.txt`.
 
