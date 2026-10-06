@@ -1,5 +1,6 @@
 import base64
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -46,7 +47,8 @@ class AccountTests(unittest.TestCase):
         combined = json.dumps(rows)+registry.path.read_text()
         for private in [token,'PRIVATE_','person@example.test','claude@example.test','grok@example.test','account-one','org-one']:
             self.assertNotIn(private,combined)
-        self.assertEqual(registry.path.stat().st_mode & 0o777,0o600)
+        if os.name != 'nt':
+            self.assertEqual(registry.path.stat().st_mode & 0o777,0o600)
 
     def test_switch_logout_and_plan_change_keep_observations(self):
         self.codex()
