@@ -24,7 +24,8 @@ def main():
     bootstrap = staging / 'MicrosoftEdgeWebview2Setup.exe'
     if not bootstrap.exists():
         urllib.request.urlretrieve('https://go.microsoft.com/fwlink/p/?LinkId=2124703', bootstrap)
-    subprocess.run(['powershell', '-NoProfile', '-Command',
+    powershell = shutil.which('pwsh') or shutil.which('powershell')
+    subprocess.run([powershell, '-NoProfile', '-Command',
                     "$s=Get-AuthenticodeSignature -LiteralPath $env:MUR_WEBVIEW_BOOTSTRAP; if ($s.Status -ne 'Valid' -or $s.SignerCertificate.Subject -notlike '*Microsoft Corporation*') {exit 1}"],
                    env=dict(os.environ, MUR_WEBVIEW_BOOTSTRAP=str(bootstrap)), check=True)
     releases = ROOT / 'dist/windows'
